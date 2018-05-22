@@ -1,14 +1,17 @@
-import React from 'react';
-import PrismCode from 'react-prism';
+import React from "react";
+import PrismCode from "react-prism";
+// import css from "css";
 // eslint-disable-next-line
-import { Prism } from 'prismjs';
-import './Home.css';
-import 'prismjs/themes/prism-tomorrow.css';
+import { Prism } from "prismjs";
+import "./Home.css";
+import "prismjs/themes/prism-tomorrow.css";
+import cssbeautify from "cssbeautify";
+import copy from "copy-to-clipboard";
 
 function getQueryVariable(query, variable) {
-  var vars = query.substring(1, query.length).split('&');
+  var vars = query.substring(1, query.length).split("&");
   for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split('=');
+    var pair = vars[i].split("=");
     if (decodeURIComponent(pair[0]) === variable) {
       return decodeURIComponent(pair[1]);
     }
@@ -27,7 +30,7 @@ class Home extends React.Component {
 
   componentDidMount() {
     if (this.props.location.search) {
-      const url = getQueryVariable(this.props.location.search, 'url');
+      const url = getQueryVariable(this.props.location.search, "url");
       if (url) {
         this.refs.url.value = url;
         this.fetchResult(url);
@@ -46,24 +49,30 @@ class Home extends React.Component {
 
   fetchResult = url => {
     if (!url.trim()) {
-      throw new Error('no url');
+      throw new Error("no url");
     }
     this.setState(prevState => ({
       fetching: true,
       result: null
     }));
-    return fetch('/api/minimize', {
-      method: 'POST',
+    return fetch("/minimize", {
+      method: "POST",
       body: JSON.stringify({ url }),
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
+        Accept: "application/json",
+        "Content-Type": "application/json"
       }
     })
       .then(response => {
         if (response.ok) {
           response.json().then(json => {
-            console.log('JSON:', json);
+            const beautified = cssbeautify(json.result.finalCss, {
+              indent: "  ",
+              // openbrace: "separate-line",
+              autosemicolon: true
+            });
+            json.result._prettier = beautified;
+
             this.setState({
               result: json,
               fetching: false,
@@ -71,7 +80,6 @@ class Home extends React.Component {
             });
           });
         } else {
-          console.log('Setting message');
           this.setState({
             errorMessage: `Server request failure (status=${response.status})`,
             fetching: false
@@ -107,7 +115,7 @@ class Home extends React.Component {
               <form
                 method="get"
                 onSubmit={this.submitForm}
-                style={{ width: '55%' }}
+                style={{ width: "55%" }}
               >
                 <div className="field is-grouped">
                   <p className="control is-expanded">
@@ -124,8 +132,8 @@ class Home extends React.Component {
                       type="submit"
                       className={
                         this.state.fetching
-                          ? 'button is-info is-medium is-loading'
-                          : 'button is-info is-medium'
+                          ? "button is-info is-medium is-loading"
+                          : "button is-info is-medium"
                       }
                       disabled={this.state.fetching}
                     >
@@ -168,7 +176,10 @@ class DisplayErrorMessage extends React.PureComponent {
 }
 
 class DisplayResult extends React.PureComponent {
-  state = { showPrettier: false };
+  state = { showPrettier: false, copiedToClipboard: false };
+  componentWillUnmount() {
+    this.dismounted = true;
+  }
 
   toggleShowPrettier = event => {
     this.setState(prevState => ({
@@ -203,26 +214,57 @@ class DisplayResult extends React.PureComponent {
     const newTotalSize = result.result.finalCss.length;
 
     return (
-      <div className="box" style={{ textAlign: 'left' }}>
+      <div className="box" style={{ textAlign: "left" }}>
         <h3 className="title is-3">Results</h3>
-        <div className="buttons">
-          <button
-            type="button"
-            className="button is-rounded"
-            onClick={this.toggleShowPrettier}
-            disabled={!this.state.showPrettier}
-          >
-            Raw CSS
-          </button>
-          <button
-            type="button"
-            className="button is-rounded"
-            onClick={this.toggleShowPrettier}
-            disabled={this.state.showPrettier}
-          >
-            Pretty CSS
-          </button>
-        </div>
+
+        <nav className="level">
+          <div className="level-left">
+            <div className="level-item">
+              <button
+                type="button"
+                className="button is-rounded"
+                onClick={this.toggleShowPrettier}
+                disabled={!this.state.showPrettier}
+              >
+                Raw CSS
+              </button>
+              <button
+                type="button"
+                className="button is-rounded"
+                onClick={this.toggleShowPrettier}
+                disabled={this.state.showPrettier}
+              >
+                Pretty CSS
+              </button>
+            </div>
+          </div>
+
+          <div className="level-right">
+            <p className="level-item">
+              <button
+                className="button"
+                onClick={event => {
+                  if (this.state.showPrettier) {
+                    copy(result.result._prettier);
+                  } else {
+                    copy(result.result.finalCss);
+                  }
+                  this.setState({ copiedToClipboard: true }, () => {
+                    window.setTimeout(() => {
+                      if (!this.dismounted) {
+                        this.setState({ copiedToClipboard: false });
+                      }
+                    }, 3000);
+                  });
+                }}
+              >
+                {this.state.copiedToClipboard
+                  ? "Copied to clipboard"
+                  : "Copy to clipboard"}
+              </button>
+            </p>
+          </div>
+        </nav>
 
         {/* XXX this is ugly */}
         <PrismCode component="pre" className="language-css">
@@ -270,7 +312,7 @@ class DisplayResult extends React.PureComponent {
                     <td>
                       <a href={url}>{url}</a>
                     </td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td style={{ textAlign: "right" }}>
                       <b>{formatSize(stylesheetContents[url].length)}</b>
                     </td>
                   </tr>
@@ -324,10 +366,10 @@ function formatTime(ms) {
 }
 
 const formatSize = (bytes, decimals = 0) => {
-  if (!bytes) return '0 bytes';
+  if (!bytes) return "0 bytes";
   const k = 1024;
   const dm = decimals + 1 || 3;
-  const sizes = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const sizes = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
