@@ -1,0 +1,20 @@
+.css {
+    font-family: monospace;
+    background-color: #efefef;
+    padding: 5px;
+    font-size: 80%;
+}
+
+/* .home form {
+    max-width: 1000px;
+} */
+
+/* For mobile, override the default padding on the hero-body */
+.home .hero-body {
+    padding: 1rem 0.5rem;
+}
+@media (min-width: 768px) {
+    .home .hero-body {
+        padding: 3rem 1.5rem;
+    }
+}
