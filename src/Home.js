@@ -1,6 +1,5 @@
 import React from "react";
 import PrismCode from "react-prism";
-// import css from "css";
 // eslint-disable-next-line
 import { Prism } from "prismjs";
 import "./Home.css";
