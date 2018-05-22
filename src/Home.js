@@ -18,15 +18,30 @@ function getQueryVariable(query, variable) {
   }
 }
 
-class Home extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      result: null,
-      fetching: false,
-      errorMessage: null
-    };
+function humanizeSeconds(mseconds) {
+  const seconds = Math.floor(mseconds / 1000);
+  const hours = Math.floor(seconds / 3600);
+  if (hours > 0) {
+    return hours === 1 ? "1 hour" : `${hours} hours`;
   }
+  const minutes = Math.floor(seconds / 60);
+  if (minutes > 0) {
+    return minutes === 1 ? "1 minute" : `${minutes} minutes`;
+  }
+  return "seconds ago";
+  // return minutes === 1 ? "1 second" : `${seconds} seconds`;
+}
+
+class Home extends React.PureComponent {
+  state = {
+    result: null,
+    fetching: false,
+    fetchingUrl: null,
+    errorMessage: null,
+    previousUrls: JSON.parse(
+      window.sessionStorage.getItem("previousUrls") || "[]"
+    )
+  };
 
   componentDidMount() {
     if (this.props.location.search) {
@@ -53,7 +68,8 @@ class Home extends React.Component {
     }
     this.setState(prevState => ({
       fetching: true,
-      result: null
+      result: null,
+      fetchingUrl: url
     }));
     return fetch("/minimize", {
       method: "POST",
@@ -73,11 +89,40 @@ class Home extends React.Component {
             });
             json.result._prettier = beautified;
 
-            this.setState({
-              result: json,
-              fetching: false,
-              errorMessage: null
-            });
+            this.setState(
+              {
+                result: json,
+                fetching: false,
+                errorMessage: null
+              },
+              () => {
+                const stylesheetContents = json.result.stylesheetContents;
+                let previousTotalSize = 0;
+                if (Object.keys(stylesheetContents).length) {
+                  previousTotalSize = Object.keys(stylesheetContents)
+                    .map(k => {
+                      return stylesheetContents[k].length;
+                    })
+                    .reduce((a, b) => a + b);
+                }
+                const newTotalSize = json.result.finalCss.length;
+                const item = {
+                  url,
+                  savings: previousTotalSize - newTotalSize,
+                  time: new Date().getTime()
+                };
+                const previous = this.state.previousUrls.filter(each => {
+                  return each.url !== url;
+                });
+                previous.unshift(item);
+                this.setState({ previousUrls: previous }, () => {
+                  window.sessionStorage.setItem(
+                    "previousUrls",
+                    JSON.stringify(previous)
+                  );
+                });
+              }
+            );
           });
         } else {
           this.setState({
@@ -106,47 +151,57 @@ class Home extends React.Component {
     return this.fetchResult(url);
   };
   render() {
+    const previousUrls = this.state.previousUrls.filter(each => {
+      return !this.state.fetchingUrl || this.state.fetchingUrl !== each.url;
+    });
+    console.log("previousUrls", previousUrls);
     return (
-      <div>
-        <div className="hero-cta">
-          <nav className="level">
-            <div className="level-item has-text-centered">
-              {/* <p>Enter the URL of a site that has a lot of CSS</p> */}
-              <form
-                method="get"
-                onSubmit={this.submitForm}
-                style={{ width: "55%" }}
-              >
-                <div className="field is-grouped">
-                  <p className="control is-expanded">
-                    <input
-                      className="input is-medium"
-                      type="url"
-                      ref="url"
-                      defaultValue="https://news.ycombinator.com"
-                      placeholder="For example. http://localhost:3000"
-                    />
-                  </p>
-                  <p className="control">
-                    <button
-                      type="submit"
-                      className={
-                        this.state.fetching
-                          ? "button is-info is-medium is-loading"
-                          : "button is-info is-medium"
-                      }
-                      disabled={this.state.fetching}
-                    >
-                      Go!
-                    </button>
-                  </p>
-                </div>
-              </form>
-            </div>
-          </nav>
+      <section className="hero home">
+        <div className="hero-body">
+          <div className="container has-text-centered">
+            {/* <p>Enter the URL of a site that has a lot of CSS</p> */}
+            <form onSubmit={this.submitForm}>
+              <div className="field is-grouped">
+                <p className="control is-expanded">
+                  <input
+                    className="input is-medium"
+                    type="url"
+                    ref="url"
+                    defaultValue="https://news.ycombinator.com"
+                    placeholder="For example. http://localhost:3000"
+                  />
+                </p>
+                <p className="control">
+                  <button
+                    type="submit"
+                    className={
+                      this.state.fetching
+                        ? "button is-info is-medium is-loading"
+                        : "button is-info is-medium"
+                    }
+                    disabled={this.state.fetching}
+                  >
+                    Go!
+                  </button>
+                </p>
+              </div>
+            </form>
+          </div>
         </div>
         <div className="section main">
           <div className="container">
+            {!(
+              this.state.fetching ||
+              this.state.errorMessage ||
+              this.state.result ||
+              this.state.previousUrls.length
+            ) ? (
+              <p>
+                <i>
+                  Waiting for you to submit a URL above to show some cool stuff.
+                </i>
+              </p>
+            ) : null}
             {this.state.fetching ? <DisplayFetching /> : null}
             {this.state.errorMessage ? (
               <DisplayErrorMessage message={this.state.errorMessage} />
@@ -155,12 +210,85 @@ class Home extends React.Component {
             )}
           </div>
         </div>
-      </div>
+
+        <DisplayPreviousUrls previousUrls={previousUrls} />
+      </section>
     );
   }
 }
 
 export default Home;
+
+class DisplayPreviousUrls extends React.PureComponent {
+  render() {
+    const { previousUrls } = this.props;
+    if (!previousUrls.length) {
+      return null;
+    }
+    return (
+      <div className="section mainxxx">
+        <div className="container">
+          <div className="box" style={{ textAlign: "left" }}>
+            <h4 className="title is-3">Previous URLs</h4>
+            <table className="table">
+              <tbody>
+                {previousUrls.map(previous => {
+                  return (
+                    <tr key={previous.url}>
+                      <td>
+                        <a href={`/?url=${encodeURIComponent(previous.url)}`}>
+                          {previous.url}
+                        </a>
+                      </td>
+                      <td>
+                        <small>
+                          <ShowSeconds
+                            mseconds={new Date().getTime() - previous.time}
+                            suffix="ago"
+                          />
+                        </small>
+                      </td>
+                      <td>Saving {formatSize(previous.savings)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+class ShowSeconds extends React.PureComponent {
+  state = {
+    mseconds: 0
+  };
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return { mseconds: nextProps.mseconds };
+  }
+  _refresh = seconds => {
+    window.setTimeout(() => {
+      if (!this.dismounted) {
+        this.setState({ mseconds: this.state.mseconds + seconds * 1000 });
+        window.setTimeout(() => {
+          this._refresh(seconds);
+        }, seconds * 1000);
+      }
+    }, seconds * 1000);
+  };
+  componentDidMount() {
+    this._refresh(10);
+  }
+  componentWillUnmount() {
+    this.dismounted = true;
+  }
+  render() {
+    const { suffix } = this.props;
+    return `${humanizeSeconds(this.state.mseconds)} ${suffix}`;
+  }
+}
 
 class DisplayErrorMessage extends React.PureComponent {
   render() {

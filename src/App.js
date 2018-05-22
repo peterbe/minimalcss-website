@@ -1,27 +1,23 @@
-import React from 'react';
+import React from "react";
 import {
   BrowserRouter as Router,
   Route,
   NavLink,
   Switch
-} from 'react-router-dom';
+} from "react-router-dom";
 
-import './App.css';
-import Home from './Home';
-import About from './About';
+import "./App.css";
+import Home from "./Home";
+import About from "./About";
 
 class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      // message: null,
-      // fetching: true
-    };
-  }
+  state = {
+    navbarMenu: false
+  };
 
   toggleNavbarMenu = event => {
     event.preventDefault();
-    console.log('work harder');
+    this.setState({ navbarMenu: !this.state.navbarMenu });
   };
 
   render() {
@@ -35,13 +31,17 @@ class App extends React.Component {
                   <div className="navbar-brand">
                     <h1 className="brand-title">
                       <NavLink className="navbar-item" to="/">
-                        Try <code>minimalcss</code>
+                        <code>minimalcss</code>
                       </NavLink>
                     </h1>
 
                     <span
                       onClick={this.toggleNavbarMenu}
-                      className="navbar-burger burger"
+                      className={
+                        this.state.navbarMenu
+                          ? "navbar-burger burger is-active"
+                          : "navbar-burger burger"
+                      }
                       data-target="navbarMenu"
                     >
                       <span />
@@ -49,18 +49,36 @@ class App extends React.Component {
                       <span />
                     </span>
                   </div>
-                  <div id="navbarMenu" className="navbar-menu">
+                  <div
+                    id="navbarMenu"
+                    className={
+                      this.state.navbarMenu
+                        ? "navbar-menu is-active"
+                        : "navbar-menu"
+                    }
+                  >
                     <div className="navbar-end">
-                      <NavLink to="/" className="navbar-item is-active">
+                      <NavLink
+                        to="/"
+                        className="navbar-item"
+                        activeClassName="is-active"
+                        exact={true}
+                      >
                         Home
                       </NavLink>
-                      <NavLink to="/about" className="navbar-item">
+                      <NavLink
+                        to="/about"
+                        className="navbar-item"
+                        activeClassName="is-active"
+                      >
                         About minimalcss
                       </NavLink>
                       <span className="navbar-item">
                         <a
                           className="button is-white is-outlined is-small"
-                          href="https://github.com/peterbe/minimalcss-heroku"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href="https://github.com/peterbe/minimalcss-website"
                         >
                           <span className="icon">
                             <i className="fa fa-github" />
@@ -87,9 +105,9 @@ class App extends React.Component {
                 <p>
                   <strong>
                     <code>minimalcss</code>
-                  </strong>{' '}
+                  </strong>{" "}
                   by <a href="https://www.peterbe.com">Peter Bengtsson</a>. Site
-                  design by <a href="https://bulma.io/">Bulma</a> and{' '}
+                  design by <a href="https://bulma.io/">Bulma</a> and{" "}
                   <a href="http://html.mijnspeelplek.com/bulma1/">
                     Bulma Templates
                   </a>

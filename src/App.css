@@ -1,10 +1,10 @@
 html,
 body {
-    font-family: 'Open Sans', serif;
+    font-family: "Open Sans", serif;
 }
 .hero.is-info {
-    /* background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url('https://unsplash.it/1200/900?random') no-repeat center center fixed; */
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url("https://unsplash.it/1200/900?random") no-repeat center center fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -21,14 +21,14 @@ body {
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-        Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol';
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol";
 }
 .header-image {
-    /* background-image: linear-gradient(rgba(0, 0, 0, 0.49), rgba(0, 0, 0, 0.89)),
-        url('https://images.unsplash.com/1/iphone-4-closeup.jpg?dpr=1&auto=format&crop=middle&fit=crop&w=2000&h=700&q=80'); */
-    background-image: linear-gradient(rgba(0, 0, 0, 0.89), rgba(0, 0, 0, 0.49));
+    background-image: linear-gradient(rgba(0, 0, 0, 0.49), rgba(0, 0, 0, 0.89)),
+        url("https://images.unsplash.com/1/iphone-4-closeup.jpg?dpr=1&auto=format&crop=middle&fit=crop&w=2000&h=700&q=80");
+    /* background-image: linear-gradient(rgba(0, 0, 0, 0.89), rgba(0, 0, 0, 0.49)); */
 }
 .is-outlined {
     background-color: transparent;
