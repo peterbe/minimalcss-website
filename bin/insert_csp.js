@@ -8,7 +8,8 @@ img-src 'self' https://images.unsplash.com;
 script-src 'self';
 style-src 'self' https://cdnjs.cloudflare.com/ajax/libs/font-awesome/;
 font-src 'self' https://cdnjs.cloudflare.com/ajax/libs/font-awesome/;
-manifest-src 'self'
+manifest-src 'self';
+connect-src 'self' https://api.minimalcss.app
 `.trim();
 
 const htmlFile = process.argv[2];
