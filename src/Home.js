@@ -155,7 +155,6 @@ class Home extends React.PureComponent {
     const previousUrls = this.state.previousUrls.filter(each => {
       return !this.state.fetchingUrl || this.state.fetchingUrl !== each.url;
     });
-    console.log("previousUrls", previousUrls);
     return (
       <section className="hero home">
         <div className="hero-body">
