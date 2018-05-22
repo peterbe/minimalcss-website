@@ -8,6 +8,8 @@ import "prismjs/themes/prism-tomorrow.css";
 import cssbeautify from "cssbeautify";
 import copy from "copy-to-clipboard";
 
+const MINIMIZE_URL = process.env.REACT_APP_ABSOLUTE_API_URL || "/minimize";
+
 function getQueryVariable(query, variable) {
   var vars = query.substring(1, query.length).split("&");
   for (var i = 0; i < vars.length; i++) {
@@ -53,13 +55,13 @@ class Home extends React.PureComponent {
     }
   }
 
+  // XXX Switch to getDerivedStateFromProps
   componentWillReceiveProps(nextProps) {
     // will be true
     const locationChanged = nextProps.location !== this.props.location;
     if (locationChanged && this.state.result) {
       this.setState({ result: null });
     }
-    // console.log('locationChanged', locationChanged);
   }
 
   fetchResult = url => {
@@ -71,7 +73,7 @@ class Home extends React.PureComponent {
       result: null,
       fetchingUrl: url
     }));
-    return fetch("/minimize", {
+    return fetch(MINIMIZE_URL, {
       method: "POST",
       body: JSON.stringify({ url }),
       headers: {
