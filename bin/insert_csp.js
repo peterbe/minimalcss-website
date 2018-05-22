@@ -4,9 +4,9 @@ const spawn = require("child_process").spawnSync;
 
 const CSP = `
 default-src 'none';
-img-src 'self';
+img-src 'self' https://images.unsplash.com;
 script-src 'self';
-style-src 'self';
+style-src 'self' https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css;
 font-src 'self';
 manifest-src 'self'
 `.trim();
