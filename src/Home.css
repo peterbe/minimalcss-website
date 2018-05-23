@@ -18,3 +18,13 @@
         padding: 3rem 1.5rem;
     }
 }
+
+.previous-urls table {
+    width: 100%;
+}
+.previous-urls table td.overflowing {
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

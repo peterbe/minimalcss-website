@@ -226,16 +226,16 @@ class DisplayPreviousUrls extends React.PureComponent {
       return null;
     }
     return (
-      <div className="section mainxxx">
+      <div className="section previous-urls">
         <div className="container">
           <div className="box" style={{ textAlign: "left" }}>
-            <h4 className="title is-3">Previous URLs</h4>
+            <h4 className="title is-3">Previous URLs Submitted</h4>
             <table className="table">
               <tbody>
                 {previousUrls.map(previous => {
                   return (
                     <tr key={previous.url}>
-                      <td>
+                      <td className="overflowing" style={{ width: "70%" }}>
                         <a href={`/?url=${encodeURIComponent(previous.url)}`}>
                           {previous.url}
                         </a>
