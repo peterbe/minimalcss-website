@@ -39,6 +39,7 @@ class Home extends React.PureComponent {
     fetching: false,
     fetchingUrl: null,
     errorMessage: null,
+    serverError: false,
     previousUrls: JSON.parse(
       window.sessionStorage.getItem("previousUrls") || "[]"
     )
@@ -83,51 +84,62 @@ class Home extends React.PureComponent {
       .then(response => {
         if (response.ok) {
           response.json().then(json => {
-            const beautified = cssbeautify(json.result.finalCss, {
-              indent: "  ",
-              // openbrace: "separate-line",
-              autosemicolon: true
-            });
-            json.result._prettier = beautified;
-
-            this.setState(
-              {
-                result: json,
+            console.log("JSON", json);
+            if (json.error) {
+              this.setState({
                 fetching: false,
-                errorMessage: null
-              },
-              () => {
-                const stylesheetContents = json.result.stylesheetContents;
-                let previousTotalSize = 0;
-                if (Object.keys(stylesheetContents).length) {
-                  previousTotalSize = Object.keys(stylesheetContents)
-                    .map(k => {
-                      return stylesheetContents[k].length;
-                    })
-                    .reduce((a, b) => a + b);
+                errorMessage: json.error,
+                serverError: false
+              });
+            } else {
+              const beautified = cssbeautify(json.result.finalCss, {
+                indent: "  ",
+                // openbrace: "separate-line",
+                autosemicolon: true
+              });
+              json.result._prettier = beautified;
+
+              this.setState(
+                {
+                  result: json,
+                  fetching: false,
+                  errorMessage: null,
+                  serverError: false
+                },
+                () => {
+                  const stylesheetContents = json.result.stylesheetContents;
+                  let previousTotalSize = 0;
+                  if (Object.keys(stylesheetContents).length) {
+                    previousTotalSize = Object.keys(stylesheetContents)
+                      .map(k => {
+                        return stylesheetContents[k].length;
+                      })
+                      .reduce((a, b) => a + b);
+                  }
+                  const newTotalSize = json.result.finalCss.length;
+                  const item = {
+                    url,
+                    savings: previousTotalSize - newTotalSize,
+                    time: new Date().getTime()
+                  };
+                  const previous = this.state.previousUrls.filter(each => {
+                    return each.url !== url;
+                  });
+                  previous.unshift(item);
+                  this.setState({ previousUrls: previous }, () => {
+                    window.sessionStorage.setItem(
+                      "previousUrls",
+                      JSON.stringify(previous)
+                    );
+                  });
                 }
-                const newTotalSize = json.result.finalCss.length;
-                const item = {
-                  url,
-                  savings: previousTotalSize - newTotalSize,
-                  time: new Date().getTime()
-                };
-                const previous = this.state.previousUrls.filter(each => {
-                  return each.url !== url;
-                });
-                previous.unshift(item);
-                this.setState({ previousUrls: previous }, () => {
-                  window.sessionStorage.setItem(
-                    "previousUrls",
-                    JSON.stringify(previous)
-                  );
-                });
-              }
-            );
+              );
+            }
           });
         } else {
           this.setState({
             errorMessage: `Server request failure (status=${response.status})`,
+            serverError: false,
             fetching: false
           });
         }
@@ -135,6 +147,7 @@ class Home extends React.PureComponent {
       .catch(e => {
         this.setState({
           errorMessage: `API call failed: ${e}`,
+          serverError: true,
           fetching: false
         });
       });
@@ -204,7 +217,10 @@ class Home extends React.PureComponent {
             ) : null}
             {this.state.fetching ? <DisplayFetching /> : null}
             {this.state.errorMessage ? (
-              <DisplayErrorMessage message={this.state.errorMessage} />
+              <DisplayErrorMessage
+                message={this.state.errorMessage}
+                serverError={this.state.serverError}
+              />
             ) : (
               <DisplayResult result={this.state.result} />
             )}
@@ -294,7 +310,17 @@ class DisplayErrorMessage extends React.PureComponent {
   render() {
     return (
       <div className="box">
-        <h3 className="title">Server Request Error</h3>
+        <h3 className="title">
+          {this.props.serverError
+            ? "Server Request Error"
+            : "Minimization Error"}
+        </h3>
+        {!this.props.serverError ? (
+          <div className="notification is-warning">
+            The request to <code>minimalcss-server</code> worked but the actual
+            minimization work failed for some reason.
+          </div>
+        ) : null}
         <div className="notification is-danger">
           <pre>{this.props.message}</pre>
         </div>
