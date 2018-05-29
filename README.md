@@ -22,3 +22,7 @@ The dev server for `minimalcss-website` proxies all requests to
 
 Copyright (c) 2017-2018 [Peter Bengtsson](https://www.peterbe.com).
 See the [LICENSE](/LICENSE) file for license rights and limitations (MIT).
+
+## Icon
+
+Icon is by [David Robertson](https://www.iconfinder.com/hooktraffic).
