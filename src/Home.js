@@ -84,7 +84,6 @@ class Home extends React.PureComponent {
       .then(response => {
         if (response.ok) {
           response.json().then(json => {
-            console.log("JSON", json);
             if (json.error) {
               this.setState({
                 fetching: false,
