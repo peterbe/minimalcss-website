@@ -24,7 +24,7 @@ class App extends React.Component {
     return (
       <Router>
         <div>
-          <section className="hero is-primary is-large header-image">
+          <section className="hero is-large header-image">
             <div className="hero-head">
               <nav className="navbar">
                 <div className="container">
@@ -80,9 +80,9 @@ class App extends React.Component {
                           rel="noopener noreferrer"
                           href="https://github.com/peterbe/minimalcss-website"
                         >
-                          <span className="icon">
+                          {/* <span className="icon">
                             <i className="fa fa-github" />
-                          </span>
+                          </span> */}
                           <span>View Source</span>
                         </a>
                       </span>
@@ -103,23 +103,32 @@ class App extends React.Component {
             <div className="container">
               <div className="content has-text-centered">
                 <p>
-                  <strong>
-                    <code>minimalcss</code>
-                  </strong>{" "}
-                  by <a href="https://www.peterbe.com">Peter Bengtsson</a>. Site
-                  design by <a href="https://bulma.io/">Bulma</a> and{" "}
+                  <a href="https://github.com/peterbe/minimalcss-website">
+                    minimalcss-website
+                  </a>{" "}
+                  uses{" "}
+                  <a href="https://github.com/peterbe/minimalcss-server">
+                    minimalcss-server
+                  </a>{" "}
+                  which uses{" "}
+                  <a href="https://github.com/peterbe/minimalcss">minimalcss</a>{" "}
+                  by <a href="https://www.peterbe.com">@peterbe</a> and{" "}
+                  <a href="https://twitter.com/stereobooster">@stereobooster</a>.
+                </p>
+                <p>
+                  Site design by <a href="https://bulma.io/">Bulma</a> and{" "}
                   <a href="http://html.mijnspeelplek.com/bulma1/">
                     Bulma Templates
                   </a>
                 </p>
-                <p>
+                {/* <p>
                   <a
                     className="icon"
                     href="https://github.com/peterbe/minimalcss"
                   >
                     <i className="fa fa-github" />
                   </a>
-                </p>
+                </p> */}
               </div>
             </div>
           </footer>
