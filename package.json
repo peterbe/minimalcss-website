@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "bulma": "0.7.1",
+    "chart.js": "2.7.2",
     "copy-to-clipboard": "3.0.8",
     "cssbeautify": "0.3.1",
     "gh-pages": "1.1.0",
