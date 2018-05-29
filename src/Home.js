@@ -30,7 +30,7 @@ function humanizeSeconds(mseconds) {
   if (minutes > 0) {
     return minutes === 1 ? "1 minute" : `${minutes} minutes`;
   }
-  return "seconds ago";
+  return "seconds";
   // return minutes === 1 ? "1 second" : `${seconds} seconds`;
 }
 
@@ -83,11 +83,11 @@ class Home extends React.PureComponent {
       }
     })
       .then(response => {
+        this.setState({fetching: false})
         if (response.ok) {
           response.json().then(json => {
             if (json.error) {
               this.setState({
-                fetching: false,
                 errorMessage: json.error,
                 serverError: false
               });
@@ -101,7 +101,6 @@ class Home extends React.PureComponent {
               this.setState(
                 {
                   result: json,
-                  fetching: false,
                   errorMessage: null,
                   serverError: false
                 },
@@ -139,7 +138,6 @@ class Home extends React.PureComponent {
           this.setState({
             errorMessage: `Server request failure (status=${response.status})`,
             serverError: false,
-            fetching: false
           });
         }
       })
@@ -147,7 +145,6 @@ class Home extends React.PureComponent {
         this.setState({
           errorMessage: `API call failed: ${e}`,
           serverError: true,
-          fetching: false
         });
       });
   };
@@ -179,7 +176,7 @@ class Home extends React.PureComponent {
                     className="input is-medium"
                     type="url"
                     ref="url"
-                    defaultValue="https://news.ycombinator.com"
+                    defaultValue="https://minimalcss.app"
                     placeholder="For example. http://localhost:3000"
                   />
                 </p>
@@ -426,7 +423,35 @@ class DisplayResult extends React.PureComponent {
             : result.result.finalCss}
         </PrismCode>
 
-        <div className="content">
+        <nav className="level results-level">
+          <div className="level-item has-text-centered">
+            <div>
+              <p className="heading">Total size (before)</p>
+              <p className="title">{formatSize(previousTotalSize)}</p>
+            </div>
+          </div>
+          <div className="level-item has-text-centered">
+            <div>
+              <p className="heading">Size (minimal)</p>
+              <p className="title">{formatSize(newTotalSize)}</p>
+            </div>
+          </div>
+          <div className="level-item has-text-centered">
+            <div>
+              <p className="heading">Size reduction</p>
+              <p className="title">
+                {formatSize(previousTotalSize - newTotalSize)}
+              </p>
+            </div>
+          </div>
+        </nav>
+        {/* <p>
+          <small>
+            Took {formatTime(result.result._took)}
+            </small>
+          </p> */}
+
+        {/* <div className="content">
           <table className="table">
             <tbody>
               <tr>
@@ -453,7 +478,7 @@ class DisplayResult extends React.PureComponent {
               </tr>
             </tbody>
           </table>
-        </div>
+        </div> */}
 
         <div className="content">
           <h4 className="title is-4">Stylesheets</h4>
@@ -480,9 +505,8 @@ class DisplayResult extends React.PureComponent {
           <ShowSizeGraph
             newTotalSize={newTotalSize}
             stylesheetContents={stylesheetContents}
-            />
+          />
         </div>
-
       </div>
     );
   }
@@ -490,98 +514,118 @@ class DisplayResult extends React.PureComponent {
 
 const shuffleArray = arr => arr.sort(() => Math.random() - 0.5);
 
+const urlToPathname = url => {
+  const u = new URL(url);
+  return u.pathname;
+};
+
 class ShowSizeGraph extends React.PureComponent {
   componentDidMount() {
-    const datasets = []
-    const colors = shuffleArray(['#ff0029',
-    '#377eb8',
-    '#66a61e',
-    '#984ea3',
-    '#00d2d5',
-    '#ff7f00',
-    '#af8d00',
-    '#7f80cd',
-    '#b3e900',
-    '#c42e60',
-    '#a65628',
-    '#f781bf',
-    '#8dd3c7',
-    '#bebada',
-    '#fb8072',
-    '#80b1d3',
-    '#fdb462',
-    '#fccde5',
-    '#bc80bd',
-    '#ffed6f',
-    '#c4eaff',
-    '#cf8c00',
-    '#1b9e77',
-    '#d95f02',
-    '#e7298a',
-    '#e6ab02',
-    '#a6761d',
-    '#0097ff',
-    '#00d067']
-  );
+    const datasets = [];
+    const colors = shuffleArray([
+      "#ff0029",
+      "#377eb8",
+      "#66a61e",
+      "#984ea3",
+      "#00d2d5",
+      "#ff7f00",
+      "#af8d00",
+      "#7f80cd",
+      "#b3e900",
+      "#c42e60",
+      "#a65628",
+      "#f781bf",
+      "#8dd3c7",
+      "#bebada",
+      "#fb8072",
+      "#80b1d3",
+      "#fdb462",
+      "#fccde5",
+      "#bc80bd",
+      "#ffed6f",
+      "#c4eaff",
+      "#cf8c00",
+      "#1b9e77",
+      "#d95f02",
+      "#e7298a",
+      "#e6ab02",
+      "#a6761d",
+      "#0097ff",
+      "#00d067"
+    ]);
 
-    let i = 1
+    let i = 1;
     for (let stylesheet in this.props.stylesheetContents) {
       datasets.push({
-        label: stylesheet,
+        label: urlToPathname(stylesheet),
         backgroundColor: colors[i++],
-        stack: 'Before',
-        data: [
-          this.props.stylesheetContents[stylesheet].length,
-          0
-        ]
-      })
+        stack: "Before",
+        data: [this.props.stylesheetContents[stylesheet].length, 0]
+      });
     }
     datasets.push({
-      label: 'minimal',
+      label: "minimal",
       backgroundColor: colors[0],
-      stack: 'After',
-      data: [
-        0,
-        this.props.newTotalSize
-      ]
-    })
+      stack: "After",
+      data: [0, this.props.newTotalSize]
+    });
 
     const barChartData = {
-			labels: ['Before', 'After'],
-			datasets: datasets,
+      labels: ["Before", "After"],
+      datasets: datasets
     };
 
-    const ctx = document.getElementById('sizegraph').getContext('2d');
-			new Chart(ctx, {
-				type: 'bar',
-				data: barChartData,
-				options: {
-					title: {
-						display: true,
-						text: 'Smaller bar(s) means less downloading time'
-					},
-					tooltips: {
-            display: false,
-						mode: 'index',
-						intersect: false
-          },
-          legend: {
-            display: false,
-          },
-					responsive: true,
-					scales: {
-						xAxes: [{
-							stacked: true,
-						}],
-						yAxes: [{
-							stacked: true
-						}]
-					}
-				}
-			});
+    const ctx = document.getElementById("sizegraph").getContext("2d");
+    new Chart(ctx, {
+      type: "bar",
+      data: barChartData,
+      options: {
+        title: {
+          display: true,
+          text: "Smaller bar(s) means less downloading time"
+        },
+        tooltips: {
+          display: false,
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            label: function(tooltipItem, data) {
+              if (tooltipItem.yLabel === 0) {
+                return null;
+              }
+              var label = data.datasets[tooltipItem.datasetIndex].label || "";
+              if (label) {
+                label += ": ";
+              }
+              label += formatSize(tooltipItem.yLabel, 0);
+              return label;
+            }
+          }
+        },
+        legend: {
+          display: false
+        },
+        responsive: true,
+        scales: {
+          xAxes: [
+            {
+              stacked: true
+            }
+          ],
+          yAxes: [
+            {
+              stacked: true,
+              ticks: {
+                callback: label => formatSize(label, 0)
+              }
+            }
+          ]
+        }
+      }
+    });
   }
   render() {
-    return <canvas id="sizegraph"></canvas>
+    return <canvas id="sizegraph" />;
   }
 }
 
@@ -616,19 +660,20 @@ class DisplayFetching extends React.PureComponent {
   }
 }
 
-function formatTime(ms) {
-  if (ms > 1000) {
-    const s = ms / 1000;
-    return `${s.toFixed(2)} seconds`;
-  }
-  return `${ms.toFixed(2)} milliseconds`;
-}
+// function formatTime(ms) {
+//   if (ms > 1000) {
+//     const s = ms / 1000;
+//     return `${s.toFixed(2)} seconds`;
+//   }
+//   return `${ms.toFixed(2)} milliseconds`;
+// }
 
-const formatSize = (bytes, decimals = 0) => {
+const formatSize = (bytes, decimals = 1) => {
   if (!bytes) return "0 bytes";
   const k = 1024;
-  const dm = decimals + 1 || 3;
   const sizes = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  return (
+    parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i]
+  );
 };

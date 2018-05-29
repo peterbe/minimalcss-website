@@ -1,8 +1,8 @@
 .css {
-    font-family: monospace;
-    background-color: #efefef;
-    padding: 5px;
-    font-size: 80%;
+  font-family: monospace;
+  background-color: #efefef;
+  padding: 5px;
+  font-size: 80%;
 }
 
 /* .home form {
@@ -11,20 +11,29 @@
 
 /* For mobile, override the default padding on the hero-body */
 .home .hero-body {
-    padding: 1rem 0.5rem;
+  padding: 1rem 0.5rem;
+}
+.level.results-level {
+  margin-top: 50px;
+  margin-bottom: 50px !important;
 }
 @media (min-width: 768px) {
-    .home .hero-body {
-        padding: 3rem 1.5rem;
-    }
+  .home .hero-body {
+    padding: 3rem 1.5rem;
+  }
+
+  .level.results-level {
+    margin-top: 50px;
+    margin-bottom: 100px;
+  }
 }
 
 .previous-urls table {
-    width: 100%;
+  width: 100%;
 }
 .previous-urls table td.overflowing {
-    max-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
