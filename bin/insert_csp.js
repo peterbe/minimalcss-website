@@ -4,10 +4,10 @@ const spawn = require("child_process").spawnSync;
 
 const CSP = `
 default-src 'none';
-img-src 'self' https://images.unsplash.com;
+img-src 'self';
 script-src 'self';
-style-src 'self' https://cdnjs.cloudflare.com/ajax/libs/font-awesome/;
-font-src 'self' https://cdnjs.cloudflare.com/ajax/libs/font-awesome/;
+style-src 'self';
+font-src 'self';
 manifest-src 'self';
 connect-src 'self' https://api.minimalcss.app
 `.trim();
