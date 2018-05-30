@@ -6,7 +6,7 @@ const CSP = `
 default-src 'none';
 img-src 'self';
 script-src 'self';
-style-src 'self';
+style-src 'self' 'unsafe-inline';
 font-src 'self';
 manifest-src 'self';
 connect-src 'self' https://api.minimalcss.app
