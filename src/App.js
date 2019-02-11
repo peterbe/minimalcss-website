@@ -94,7 +94,6 @@ class App extends React.Component {
           </section>
           <Switch>
             <Route path="/" exact component={Home} />
-            {/* <Redirect from="/old-match" to="/will-match"/> */}
             <Route path="/about" component={About} />
             <Route component={NoMatch} />
           </Switch>
@@ -113,7 +112,8 @@ class App extends React.Component {
                   which uses{" "}
                   <a href="https://github.com/peterbe/minimalcss">minimalcss</a>{" "}
                   by <a href="https://www.peterbe.com">@peterbe</a> and{" "}
-                  <a href="https://twitter.com/stereobooster">@stereobooster</a>.
+                  <a href="https://twitter.com/stereobooster">@stereobooster</a>
+                  .
                 </p>
                 <p>
                   Site design by <a href="https://bulma.io/">Bulma</a> and{" "}
@@ -121,14 +121,6 @@ class App extends React.Component {
                     Bulma Templates
                   </a>
                 </p>
-                {/* <p>
-                  <a
-                    className="icon"
-                    href="https://github.com/peterbe/minimalcss"
-                  >
-                    <i className="fa fa-github" />
-                  </a>
-                </p> */}
               </div>
             </div>
           </footer>
@@ -140,10 +132,12 @@ class App extends React.Component {
 
 export default App;
 
-const NoMatch = ({ location }) => (
-  <div>
-    <h3>
-      No match for <code>{location.pathname}</code>
-    </h3>
-  </div>
-);
+function NoMatch({ location }) {
+  return (
+    <div>
+      <h3>
+        No match for <code>{location.pathname}</code>
+      </h3>
+    </div>
+  );
+}

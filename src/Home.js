@@ -56,10 +56,8 @@ class Home extends React.PureComponent {
     }
   }
 
-  // XXX Switch to getDerivedStateFromProps
-  componentWillReceiveProps(nextProps) {
-    // will be true
-    const locationChanged = nextProps.location !== this.props.location;
+  componentDidUpdate(prevProps) {
+    const locationChanged = prevProps.location !== this.props.location;
     if (locationChanged && this.state.result) {
       this.setState({ result: null });
     }
@@ -72,7 +70,9 @@ class Home extends React.PureComponent {
     this.setState(prevState => ({
       fetching: true,
       result: null,
-      fetchingUrl: url
+      fetchingUrl: url,
+      errorMessage: null,
+      serverError: false
     }));
     return fetch(MINIMIZE_URL, {
       method: "POST",
@@ -83,7 +83,7 @@ class Home extends React.PureComponent {
       }
     })
       .then(response => {
-        this.setState({fetching: false})
+        this.setState({ fetching: false });
         if (response.ok) {
           response.json().then(json => {
             if (json.error) {
@@ -137,14 +137,14 @@ class Home extends React.PureComponent {
         } else {
           this.setState({
             errorMessage: `Server request failure (status=${response.status})`,
-            serverError: false,
+            serverError: false
           });
         }
       })
       .catch(e => {
         this.setState({
           errorMessage: `API call failed: ${e}`,
-          serverError: true,
+          serverError: true
         });
       });
   };
@@ -231,47 +231,44 @@ class Home extends React.PureComponent {
 
 export default Home;
 
-class DisplayPreviousUrls extends React.PureComponent {
-  render() {
-    const { previousUrls } = this.props;
-    if (!previousUrls.length) {
-      return null;
-    }
-    return (
-      <div className="section previous-urls">
-        <div className="container">
-          <div className="box" style={{ textAlign: "left" }}>
-            <h4 className="title is-3">Previous URLs Submitted</h4>
-            <table className="table">
-              <tbody>
-                {previousUrls.map(previous => {
-                  return (
-                    <tr key={previous.url}>
-                      <td className="overflowing" style={{ width: "70%" }}>
-                        <a href={`/?url=${encodeURIComponent(previous.url)}`}>
-                          {previous.url}
-                        </a>
-                      </td>
-                      <td>
-                        <small>
-                          <ShowSeconds
-                            mseconds={new Date().getTime() - previous.time}
-                            suffix="ago"
-                          />
-                        </small>
-                      </td>
-                      <td>Saving {formatSize(previous.savings)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+const DisplayPreviousUrls = React.memo(({ previousUrls }) => {
+  if (!previousUrls.length) {
+    return null;
+  }
+  return (
+    <div className="section previous-urls">
+      <div className="container">
+        <div className="box" style={{ textAlign: "left" }}>
+          <h4 className="title is-3">Previous URLs Submitted</h4>
+          <table className="table">
+            <tbody>
+              {previousUrls.map(previous => {
+                return (
+                  <tr key={previous.url}>
+                    <td className="overflowing" style={{ width: "70%" }}>
+                      <a href={`/?url=${encodeURIComponent(previous.url)}`}>
+                        {previous.url}
+                      </a>
+                    </td>
+                    <td>
+                      <small>
+                        <ShowSeconds
+                          mseconds={new Date().getTime() - previous.time}
+                          suffix="ago"
+                        />
+                      </small>
+                    </td>
+                    <td>Saving {formatSize(previous.savings)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+});
 
 class ShowSeconds extends React.PureComponent {
   state = {
