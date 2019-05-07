@@ -10,6 +10,8 @@ import copy from "copy-to-clipboard";
 
 const MINIMIZE_URL = process.env.REACT_APP_ABSOLUTE_API_URL || "/minimize";
 
+const DEFAULT_URL = "https://minimalcss.app";
+
 function getQueryVariable(query, variable) {
   var vars = query.substring(1, query.length).split("&");
   for (var i = 0; i < vars.length; i++) {
@@ -43,15 +45,15 @@ class Home extends React.PureComponent {
     serverError: false,
     previousUrls: JSON.parse(
       window.sessionStorage.getItem("previousUrls") || "[]"
-    )
+    ),
+    url: DEFAULT_URL
   };
 
   componentDidMount() {
     if (this.props.location.search) {
       const url = getQueryVariable(this.props.location.search, "url");
       if (url) {
-        this.refs.url.value = url;
-        this.fetchResult(url);
+        this.setState({ url: url.trim() }, this.fetchResult);
       }
     }
   }
@@ -63,7 +65,8 @@ class Home extends React.PureComponent {
     }
   }
 
-  fetchResult = url => {
+  fetchResult = () => {
+    const url = this.state.url;
     if (!url.trim()) {
       throw new Error("no url");
     }
@@ -151,14 +154,14 @@ class Home extends React.PureComponent {
 
   submitForm = event => {
     event.preventDefault();
-    const url = this.refs.url.value.trim();
+    const url = this.state.url.trim();
     if (!url) {
       return;
     }
     let newPath = this.props.location.pathname;
     newPath += `?url=${encodeURIComponent(url)}`;
     this.props.history.push(newPath);
-    return this.fetchResult(url);
+    return this.fetchResult();
   };
   render() {
     const previousUrls = this.state.previousUrls.filter(each => {
@@ -175,9 +178,31 @@ class Home extends React.PureComponent {
                   <input
                     className="input is-medium"
                     type="url"
-                    ref="url"
-                    defaultValue="https://minimalcss.app"
-                    placeholder="For example. http://localhost:3000"
+                    value={this.state.url}
+                    onChange={event => {
+                      this.setState({ url: event.target.value }, () => {
+                        // Did you accidentally paste in after the default value
+                        if (
+                          this.state.url.startsWith(DEFAULT_URL) &&
+                          this.state.url !== DEFAULT_URL
+                        ) {
+                          this.setState({
+                            url: this.state.url.replace(DEFAULT_URL, "").trim()
+                          });
+                        } else if (
+                          (this.state.url.match(/:\/\//g) || []).length > 1
+                        ) {
+                          const matches = [
+                            ...this.state.url.matchAll(/http?s:\/\//g)
+                          ];
+                          const last = matches[matches.length - 1];
+                          this.setState({
+                            url: this.state.url.slice(last.index).trim()
+                          });
+                        }
+                      });
+                    }}
+                    placeholder={`For example. ${DEFAULT_URL}`}
                   />
                 </p>
                 <p className="control">
