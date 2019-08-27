@@ -577,14 +577,14 @@ class ShowSizeGraph extends React.PureComponent {
     ]);
 
     let i = 1;
-    for (let stylesheet in this.props.stylesheetContents) {
+    Object.keys(this.props.stylesheetContents).forEach(stylesheet => {
       datasets.push({
         label: urlToPathname(stylesheet),
         backgroundColor: colors[i++],
         stack: "Before",
         data: [this.props.stylesheetContents[stylesheet].length, 0]
       });
-    }
+    });
     datasets.push({
       label: "minimal",
       backgroundColor: colors[0],
