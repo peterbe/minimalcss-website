@@ -5,22 +5,27 @@
   "author": "Peter Bengtsson",
   "license": "MIT",
   "devDependencies": {
-    "react-scripts": "3.0.1"
+    "react-scripts": "3.1.1"
   },
   "dependencies": {
-    "bulma": "0.7.4",
+    "bulma": "0.7.5",
     "chart.js": "2.8.0",
     "copy-to-clipboard": "3.2.0",
     "cssbeautify": "0.3.1",
-    "gh-pages": "2.0.1",
-    "prismjs": "1.16.0",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
+    "gh-pages": "2.1.1",
+    "prismjs": "1.17.1",
+    "react": "16.9.0",
+    "react-dom": "16.9.0",
     "react-prism": "4.3.2",
-    "react-router-dom": "5.0.0"
+    "react-router-dom": "5.0.1"
   },
   "resolutions": {
-    "js-yaml": ">=3.13.1"
+    "js-yaml": ">=3.13.1",
+    "eslint-utils": ">=1.4.2",
+    "lodash": ">=4.17.12",
+    "mixin-deep": ">=1.3.2",
+    "set-value": ">=2.0.1"
+
   },
   "scripts": {
     "start": "react-scripts start",
