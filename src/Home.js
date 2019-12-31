@@ -138,10 +138,28 @@ class Home extends React.PureComponent {
             }
           });
         } else {
-          this.setState({
-            errorMessage: `Server request failure (status=${response.status})`,
-            serverError: false
-          });
+          response
+            .json()
+            .then(json => {
+              if (json && json.error) {
+                this.setState({
+                  errorMessage: json.error,
+                  serverError: false
+                });
+              } else {
+                this.setState({
+                  errorMessage: `Server request failure (status=${response.status})`,
+                  serverError: false
+                });
+              }
+            })
+            .catch(ex => {
+              console.log(`${response.status} error wasn't JSON`);
+              this.setState({
+                errorMessage: `Server request failure (status=${response.status})`,
+                serverError: false
+              });
+            });
         }
       })
       .catch(e => {
@@ -336,7 +354,7 @@ class DisplayErrorMessage extends React.PureComponent {
         {!this.props.serverError ? (
           <div className="notification is-warning">
             The request to <code>minimalcss-server</code> worked but the actual
-            minimization work failed for some reason.
+            minimization work failed.
           </div>
         ) : null}
         <div className="notification is-danger">
