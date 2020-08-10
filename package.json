@@ -19,15 +19,6 @@
     "react-prism": "4.3.2",
     "react-router-dom": "5.2.0"
   },
-  "resolutions": {
-    "js-yaml": ">=3.13.1",
-    "eslint-utils": ">=1.4.2",
-    "lodash": ">=4.17.12",
-    "mixin-deep": ">=1.3.2",
-    "set-value": ">=2.0.1",
-    "serialize-javascript": ">=2.1.1",
-    "handlebars": ">=4.5.3"
-  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -35,10 +26,16 @@
     "deploy": "./bin/deploy.sh"
   },
   "proxy": "http://localhost:5000",
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }
