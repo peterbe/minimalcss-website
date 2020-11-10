@@ -19,6 +19,9 @@
     "react-prism": "4.3.2",
     "react-router-dom": "5.2.0"
   },
+  "resolutions": {
+    "node-forge": ">=0.10.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -36,6 +39,12 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
     ]
   }
 }
