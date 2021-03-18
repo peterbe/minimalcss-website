@@ -5,7 +5,8 @@ import { Prism } from "prismjs";
 import Chart from "chart.js";
 import "./Home.css";
 import "prismjs/themes/prism-tomorrow.css";
-import cssbeautify from "cssbeautify";
+import prettier from "prettier/standalone";
+import plugins from "prettier/parser-postcss";
 import copy from "copy-to-clipboard";
 
 const MINIMIZE_URL = process.env.REACT_APP_ABSOLUTE_API_URL || "/minimize";
@@ -46,7 +47,7 @@ class Home extends React.PureComponent {
     previousUrls: JSON.parse(
       window.sessionStorage.getItem("previousUrls") || "[]"
     ),
-    url: DEFAULT_URL
+    url: DEFAULT_URL,
   };
 
   componentDidMount() {
@@ -70,49 +71,49 @@ class Home extends React.PureComponent {
     if (!url.trim()) {
       throw new Error("no url");
     }
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       fetching: true,
       result: null,
       fetchingUrl: url,
       errorMessage: null,
-      serverError: false
+      serverError: false,
     }));
     return fetch(MINIMIZE_URL, {
       method: "POST",
       body: JSON.stringify({ url }),
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json"
-      }
+        "Content-Type": "application/json",
+      },
     })
-      .then(response => {
+      .then((response) => {
         this.setState({ fetching: false });
         if (response.ok) {
-          response.json().then(json => {
+          response.json().then((json) => {
             if (json.error) {
               this.setState({
                 errorMessage: json.error,
-                serverError: false
+                serverError: false,
               });
             } else {
-              const beautified = cssbeautify(json.result.finalCss, {
-                indent: "  ",
-                // openbrace: "separate-line",
-                autosemicolon: true
+              const beautified = prettier.format(json.result.finalCss, {
+                semi: true,
+                parser: "css",
+                plugins: [plugins],
               });
               json.result._prettier = beautified;
               this.setState(
                 {
                   result: json,
                   errorMessage: null,
-                  serverError: false
+                  serverError: false,
                 },
                 () => {
                   const stylesheetContents = json.result.stylesheetContents;
                   let previousTotalSize = 0;
                   if (Object.keys(stylesheetContents).length) {
                     previousTotalSize = Object.keys(stylesheetContents)
-                      .map(k => {
+                      .map((k) => {
                         return stylesheetContents[k].length;
                       })
                       .reduce((a, b) => a + b);
@@ -121,9 +122,9 @@ class Home extends React.PureComponent {
                   const item = {
                     url,
                     savings: previousTotalSize - newTotalSize,
-                    time: new Date().getTime()
+                    time: new Date().getTime(),
                   };
-                  const previous = this.state.previousUrls.filter(each => {
+                  const previous = this.state.previousUrls.filter((each) => {
                     return each.url !== url;
                   });
                   previous.unshift(item);
@@ -140,37 +141,37 @@ class Home extends React.PureComponent {
         } else {
           response
             .json()
-            .then(json => {
+            .then((json) => {
               if (json && json.error) {
                 this.setState({
                   errorMessage: json.error,
-                  serverError: false
+                  serverError: false,
                 });
               } else {
                 this.setState({
                   errorMessage: `Server request failure (status=${response.status})`,
-                  serverError: false
+                  serverError: false,
                 });
               }
             })
-            .catch(ex => {
+            .catch((ex) => {
               console.log(`${response.status} error wasn't JSON`);
               this.setState({
                 errorMessage: `Server request failure (status=${response.status})`,
-                serverError: false
+                serverError: false,
               });
             });
         }
       })
-      .catch(e => {
+      .catch((e) => {
         this.setState({
           errorMessage: `API call failed: ${e}`,
-          serverError: true
+          serverError: true,
         });
       });
   };
 
-  submitForm = event => {
+  submitForm = (event) => {
     event.preventDefault();
     const url = this.state.url.trim();
     if (!url) {
@@ -182,7 +183,7 @@ class Home extends React.PureComponent {
     return this.fetchResult();
   };
   render() {
-    const previousUrls = this.state.previousUrls.filter(each => {
+    const previousUrls = this.state.previousUrls.filter((each) => {
       return !this.state.fetchingUrl || this.state.fetchingUrl !== each.url;
     });
     return (
@@ -197,7 +198,7 @@ class Home extends React.PureComponent {
                     className="input is-medium"
                     type="url"
                     value={this.state.url}
-                    onChange={event => {
+                    onChange={(event) => {
                       this.setState({ url: event.target.value }, () => {
                         // Did you accidentally paste in after the default value
                         if (
@@ -205,17 +206,17 @@ class Home extends React.PureComponent {
                           this.state.url !== DEFAULT_URL
                         ) {
                           this.setState({
-                            url: this.state.url.replace(DEFAULT_URL, "").trim()
+                            url: this.state.url.replace(DEFAULT_URL, "").trim(),
                           });
                         } else if (
                           (this.state.url.match(/:\/\//g) || []).length > 1
                         ) {
                           const matches = [
-                            ...this.state.url.matchAll(/http?s:\/\//g)
+                            ...this.state.url.matchAll(/http?s:\/\//g),
                           ];
                           const last = matches[matches.length - 1];
                           this.setState({
-                            url: this.state.url.slice(last.index).trim()
+                            url: this.state.url.slice(last.index).trim(),
                           });
                         }
                       });
@@ -285,7 +286,7 @@ const DisplayPreviousUrls = React.memo(({ previousUrls }) => {
           <h4 className="title is-3">Previous URLs Submitted</h4>
           <table className="table">
             <tbody>
-              {previousUrls.map(previous => {
+              {previousUrls.map((previous) => {
                 return (
                   <tr key={previous.url}>
                     <td className="overflowing" style={{ width: "70%" }}>
@@ -315,12 +316,12 @@ const DisplayPreviousUrls = React.memo(({ previousUrls }) => {
 
 class ShowSeconds extends React.PureComponent {
   state = {
-    mseconds: 0
+    mseconds: 0,
   };
   static getDerivedStateFromProps(nextProps, prevState) {
     return { mseconds: nextProps.mseconds };
   }
-  _refresh = seconds => {
+  _refresh = (seconds) => {
     window.setTimeout(() => {
       if (!this.dismounted) {
         this.setState({ mseconds: this.state.mseconds + seconds * 1000 });
@@ -371,9 +372,9 @@ class DisplayResult extends React.PureComponent {
     this.dismounted = true;
   }
 
-  toggleShowPrettier = event => {
-    this.setState(prevState => ({
-      showPrettier: !prevState.showPrettier
+  toggleShowPrettier = (event) => {
+    this.setState((prevState) => ({
+      showPrettier: !prevState.showPrettier,
     }));
   };
 
@@ -396,7 +397,7 @@ class DisplayResult extends React.PureComponent {
     let previousTotalSize = 0;
     if (Object.keys(stylesheetContents).length) {
       previousTotalSize = Object.keys(stylesheetContents)
-        .map(k => {
+        .map((k) => {
           return stylesheetContents[k].length;
         })
         .reduce((a, b) => a + b);
@@ -433,7 +434,7 @@ class DisplayResult extends React.PureComponent {
             <p className="level-item">
               <button
                 className="button"
-                onClick={event => {
+                onClick={(event) => {
                   if (this.state.showPrettier) {
                     copy(result.result._prettier);
                   } else {
@@ -524,7 +525,7 @@ class DisplayResult extends React.PureComponent {
           <h4 className="title is-4">Stylesheets</h4>
           <table className="table">
             <tbody>
-              {Object.keys(stylesheetContents).map(url => {
+              {Object.keys(stylesheetContents).map((url) => {
                 return (
                   <tr key={url}>
                     <td>
@@ -552,9 +553,9 @@ class DisplayResult extends React.PureComponent {
   }
 }
 
-const shuffleArray = arr => arr.sort(() => Math.random() - 0.5);
+const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
 
-const urlToPathname = url => {
+const urlToPathname = (url) => {
   const u = new URL(url);
   return u.pathname;
 };
@@ -591,28 +592,28 @@ class ShowSizeGraph extends React.PureComponent {
       "#e6ab02",
       "#a6761d",
       "#0097ff",
-      "#00d067"
+      "#00d067",
     ]);
 
     let i = 1;
-    Object.keys(this.props.stylesheetContents).forEach(stylesheet => {
+    Object.keys(this.props.stylesheetContents).forEach((stylesheet) => {
       datasets.push({
         label: urlToPathname(stylesheet),
         backgroundColor: colors[i++],
         stack: "Before",
-        data: [this.props.stylesheetContents[stylesheet].length, 0]
+        data: [this.props.stylesheetContents[stylesheet].length, 0],
       });
     });
     datasets.push({
       label: "minimal",
       backgroundColor: colors[0],
       stack: "After",
-      data: [0, this.props.newTotalSize]
+      data: [0, this.props.newTotalSize],
     });
 
     const barChartData = {
       labels: ["Before", "After"],
-      datasets: datasets
+      datasets: datasets,
     };
 
     const ctx = document.getElementById("sizegraph").getContext("2d");
@@ -622,14 +623,14 @@ class ShowSizeGraph extends React.PureComponent {
       options: {
         title: {
           display: true,
-          text: "Smaller bar(s) means less downloading time"
+          text: "Smaller bar(s) means less downloading time",
         },
         tooltips: {
           display: false,
           mode: "index",
           intersect: false,
           callbacks: {
-            label: function(tooltipItem, data) {
+            label: function (tooltipItem, data) {
               if (tooltipItem.yLabel === 0) {
                 return null;
               }
@@ -639,29 +640,29 @@ class ShowSizeGraph extends React.PureComponent {
               }
               label += formatSize(tooltipItem.yLabel, 0);
               return label;
-            }
-          }
+            },
+          },
         },
         legend: {
-          display: false
+          display: false,
         },
         responsive: true,
         scales: {
           xAxes: [
             {
-              stacked: true
-            }
+              stacked: true,
+            },
           ],
           yAxes: [
             {
               stacked: true,
               ticks: {
-                callback: label => formatSize(label, 0)
-              }
-            }
-          ]
-        }
-      }
+                callback: (label) => formatSize(label, 0),
+              },
+            },
+          ],
+        },
+      },
     });
   }
   render() {
@@ -675,8 +676,8 @@ class DisplayFetching extends React.PureComponent {
     this.interval = setInterval(() => {
       if (this.dismounted) return;
 
-      this.setState(prevState => ({
-        waiting: prevState.waiting + 1
+      this.setState((prevState) => ({
+        waiting: prevState.waiting + 1,
       }));
     }, 1000);
   }
