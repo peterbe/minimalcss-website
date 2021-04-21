@@ -5,8 +5,6 @@ import { Prism } from "prismjs";
 import Chart from "chart.js";
 import "./Home.css";
 import "prismjs/themes/prism-tomorrow.css";
-import prettier from "prettier/standalone";
-import plugins from "prettier/parser-postcss";
 import copy from "copy-to-clipboard";
 
 const MINIMIZE_URL = process.env.REACT_APP_ABSOLUTE_API_URL || "/minimize";
@@ -34,7 +32,6 @@ function humanizeSeconds(mseconds) {
     return minutes === 1 ? "1 minute" : `${minutes} minutes`;
   }
   return "seconds";
-  // return minutes === 1 ? "1 second" : `${seconds} seconds`;
 }
 
 class Home extends React.PureComponent {
@@ -71,7 +68,7 @@ class Home extends React.PureComponent {
     if (!url.trim()) {
       throw new Error("no url");
     }
-    this.setState((prevState) => ({
+    this.setState(() => ({
       fetching: true,
       result: null,
       fetchingUrl: url,
@@ -80,7 +77,7 @@ class Home extends React.PureComponent {
     }));
     return fetch(MINIMIZE_URL, {
       method: "POST",
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, prettier: true }),
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -96,12 +93,6 @@ class Home extends React.PureComponent {
                 serverError: false,
               });
             } else {
-              const beautified = prettier.format(json.result.finalCss, {
-                semi: true,
-                parser: "css",
-                plugins: [plugins],
-              });
-              json.result._prettier = beautified;
               this.setState(
                 {
                   result: json,

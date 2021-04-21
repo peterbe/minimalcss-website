@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 const fs = require("fs");
-const spawn = require("child_process").spawnSync;
 
 const CSP = `
 default-src 'none';
