@@ -2,11 +2,11 @@ import React from "react";
 import PrismCode from "react-prism";
 // eslint-disable-next-line
 import { Prism } from "prismjs";
-import Chart from "chart.js";
 import "./Home.css";
 import "prismjs/themes/prism-tomorrow.css";
 import copy from "copy-to-clipboard";
 
+const ShowSizeGraph = React.lazy(() => import("./SizeGraph"));
 const MINIMIZE_URL = process.env.REACT_APP_ABSOLUTE_API_URL || "/minimize";
 
 const DEFAULT_URL = "https://minimalcss.app";
@@ -477,40 +477,6 @@ class DisplayResult extends React.PureComponent {
             </div>
           </div>
         </nav>
-        {/* <p>
-          <small>
-            Took {formatTime(result.result._took)}
-            </small>
-          </p> */}
-
-        {/* <div className="content">
-          <table className="table">
-            <tbody>
-              <tr>
-                <th>Took</th>
-                <td>{formatTime(result.result._took)}</td>
-              </tr>
-              <tr>
-                <th>Size (minimal)</th>
-                <td>
-                  <strong>{formatSize(newTotalSize)}</strong>
-                </td>
-              </tr>
-              <tr>
-                <th>Total size (before)</th>
-                <td>{formatSize(previousTotalSize)}</td>
-              </tr>
-              <tr>
-                <th>Size reduction</th>
-                <td>
-                  <strong>
-                    {formatSize(previousTotalSize - newTotalSize)}
-                  </strong>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div> */}
 
         <div className="content">
           <h4 className="title is-4">Stylesheets</h4>
@@ -534,130 +500,15 @@ class DisplayResult extends React.PureComponent {
 
         <div className="content">
           <h4 className="title is-4">Graphically</h4>
-          <ShowSizeGraph
-            newTotalSize={newTotalSize}
-            stylesheetContents={stylesheetContents}
-          />
+          <React.Suspense fallback={<p>Loading graph...</p>}>
+            <ShowSizeGraph
+              newTotalSize={newTotalSize}
+              stylesheetContents={stylesheetContents}
+            />
+          </React.Suspense>
         </div>
       </div>
     );
-  }
-}
-
-const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
-
-const urlToPathname = (url) => {
-  const u = new URL(url);
-  return u.pathname;
-};
-
-class ShowSizeGraph extends React.PureComponent {
-  componentDidMount() {
-    const datasets = [];
-    const colors = shuffleArray([
-      "#ff0029",
-      "#377eb8",
-      "#66a61e",
-      "#984ea3",
-      "#00d2d5",
-      "#ff7f00",
-      "#af8d00",
-      "#7f80cd",
-      "#b3e900",
-      "#c42e60",
-      "#a65628",
-      "#f781bf",
-      "#8dd3c7",
-      "#bebada",
-      "#fb8072",
-      "#80b1d3",
-      "#fdb462",
-      "#fccde5",
-      "#bc80bd",
-      "#ffed6f",
-      "#c4eaff",
-      "#cf8c00",
-      "#1b9e77",
-      "#d95f02",
-      "#e7298a",
-      "#e6ab02",
-      "#a6761d",
-      "#0097ff",
-      "#00d067",
-    ]);
-
-    let i = 1;
-    Object.keys(this.props.stylesheetContents).forEach((stylesheet) => {
-      datasets.push({
-        label: urlToPathname(stylesheet),
-        backgroundColor: colors[i++],
-        stack: "Before",
-        data: [this.props.stylesheetContents[stylesheet].length, 0],
-      });
-    });
-    datasets.push({
-      label: "minimal",
-      backgroundColor: colors[0],
-      stack: "After",
-      data: [0, this.props.newTotalSize],
-    });
-
-    const barChartData = {
-      labels: ["Before", "After"],
-      datasets: datasets,
-    };
-
-    const ctx = document.getElementById("sizegraph").getContext("2d");
-    new Chart(ctx, {
-      type: "bar",
-      data: barChartData,
-      options: {
-        title: {
-          display: true,
-          text: "Smaller bar(s) means less downloading time",
-        },
-        tooltips: {
-          display: false,
-          mode: "index",
-          intersect: false,
-          callbacks: {
-            label: function (tooltipItem, data) {
-              if (tooltipItem.yLabel === 0) {
-                return null;
-              }
-              var label = data.datasets[tooltipItem.datasetIndex].label || "";
-              if (label) {
-                label += ": ";
-              }
-              label += formatSize(tooltipItem.yLabel, 0);
-              return label;
-            },
-          },
-        },
-        legend: {
-          display: false,
-        },
-        responsive: true,
-        scales: {
-          xAxes: [
-            {
-              stacked: true,
-            },
-          ],
-          yAxes: [
-            {
-              stacked: true,
-              ticks: {
-                callback: (label) => formatSize(label, 0),
-              },
-            },
-          ],
-        },
-      },
-    });
-  }
-  render() {
-    return <canvas id="sizegraph" />;
   }
 }
 
@@ -691,14 +542,6 @@ class DisplayFetching extends React.PureComponent {
     );
   }
 }
-
-// function formatTime(ms) {
-//   if (ms > 1000) {
-//     const s = ms / 1000;
-//     return `${s.toFixed(2)} seconds`;
-//   }
-//   return `${ms.toFixed(2)} milliseconds`;
-// }
 
 const formatSize = (bytes, decimals = 1) => {
   if (!bytes) return "0 bytes";
