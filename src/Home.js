@@ -87,9 +87,9 @@ class Home extends React.PureComponent {
         this.setState({ fetching: false });
         if (response.ok) {
           response.json().then((json) => {
-            if (json.error) {
+            if (json.error || (json.status_code !== 200 && !json.result)) {
               this.setState({
-                errorMessage: json.error,
+                errorMessage: json.error || `${json.status_code} != 200`,
                 serverError: false,
               });
             } else {
