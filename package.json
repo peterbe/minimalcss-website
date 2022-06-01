@@ -8,7 +8,7 @@
     "react-scripts": "5.0.0"
   },
   "dependencies": {
-    "bulma": "0.9.3",
+    "bulma": "0.9.4",
     "chart.js": "2.9.4",
     "copy-to-clipboard": "3.3.1",
     "gh-pages": "3.2.3",
